@@ -1,0 +1,70 @@
+# transmission-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transmission
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transmission
+  template:
+    metadata:
+      labels:
+        app: transmission
+    spec:
+      containers:
+      - name: transmission
+        image: linuxserver/transmission:latest
+        ports:
+        - containerPort: 9091   # Web UI
+        - containerPort: 51413  # Torrent TCP
+        - containerPort: 51413  # Torrent UDP
+          protocol: UDP
+        env:
+        - name: PUID
+          value: "1000"
+        - name: PGID
+          value: "1000"
+        - name: TZ
+          value: "Asia/Kolkata"   # adjust to your timezone
+        - name: TRANSMISSION_DOWNLOAD_DIR
+          value: "/downloads"     # sets default download path
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: downloads
+          mountPath: /downloads
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: transmission-config-pvc
+      - name: downloads
+        persistentVolumeClaim:
+          claimName: transmission-downloads-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: transmission
+  namespace: media
+spec:
+  type: NodePort
+  selector:
+    app: transmission
+  ports:
+  - name: webui
+    port: 9091
+    targetPort: 9091
+    nodePort: 30091
+  - name: torrent-tcp
+    port: 51413
+    targetPort: 51413
+    nodePort: 30113
+  - name: torrent-udp
+    port: 51413
+    targetPort: 51413
+    nodePort: 30113
+    protocol: UDP
+
