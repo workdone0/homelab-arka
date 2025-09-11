@@ -1,0 +1,24 @@
+deploymentMode: SingleBinary
+
+loki:
+  storage:
+    type: filesystem
+
+singleBinary:
+  replicas: 1
+
+backend:
+  replicas: 0
+read:
+  replicas: 0
+write:
+  replicas: 0
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
