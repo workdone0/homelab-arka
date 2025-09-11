@@ -1,24 +1,68 @@
 deploymentMode: SingleBinary
 
 loki:
+  auth_enabled: false
+  commonConfig:
+    replication_factor: 1
   storage:
     type: filesystem
 
 singleBinary:
   replicas: 1
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: local-path
+
+# Explicitly disable all distributed components
+gateway:
+  enabled: false
 
 backend:
   replicas: 0
 read:
-  replicas: 0
+  replicas: 0  
 write:
   replicas: 0
 
-persistence:
+# Disable caching components for SingleBinary
+chunksCache:
   enabled: false
+resultsCache:
+  enabled: false
+indexGateway:
+  enabled: false
+compactor:
+  enabled: false
+ruler:
+  enabled: false
+indexGateway:
+  enabled: false
+queryScheduler:
+  enabled: false
+bloomCompactor:
+  enabled: false
+bloomGateway:
+  enabled: false
+
+# Disable pattern ingester
+pattern_ingester:
+  enabled: false
+
+# Disable test components
+test:
+  enabled: false
+
+monitoring:
+  selfMonitoring:
+    enabled: false
+  serviceMonitor:
+    enabled: false
 
 resources:
   requests:
-    cpu: 100m
-    memory: 256Mi
-
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
